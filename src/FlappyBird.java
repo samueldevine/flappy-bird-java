@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.*;
 
-public class FlappyBird extends JPanel {
+public class FlappyBird extends JPanel implements ActionListener{
     int boardWidth = 360;
     int boardHeight = 640;
 
@@ -18,6 +18,7 @@ public class FlappyBird extends JPanel {
     int birdWidth = 34;
     int birdHeight = 24;
 
+
     class Bird {
         int x = birdX;
         int y = birdY;
@@ -25,15 +26,18 @@ public class FlappyBird extends JPanel {
         int height = birdHeight;
         Image img;
 
-        Bird(Image img) {
+        // Constructor
+        public Bird(Image img) {
             this.img = img;
         }
     }
 
     Bird bird;
 
+    Timer gameLoop;
+
     // Constructor
-    FlappyBird() {
+    public FlappyBird() {
         setPreferredSize(new Dimension(boardWidth, boardHeight));
 
         backgroundImg = new ImageIcon(getClass().getResource("./flappybirdbg.png")).getImage();
@@ -42,6 +46,9 @@ public class FlappyBird extends JPanel {
         bottomPipeImg = new ImageIcon(getClass().getResource("./bottompipe.png")).getImage();
 
         bird = new Bird(birdImg);
+
+        gameLoop = new Timer(1000/60, this); // 1000ms == 1s, divide by 60 for 60fps
+        gameLoop.start();
     }
 
     public void paintComponent(Graphics g) {
@@ -52,5 +59,10 @@ public class FlappyBird extends JPanel {
     public void draw(Graphics g) {
         g.drawImage(backgroundImg, 0, 0, boardWidth, boardHeight, null);
         g.drawImage(bird.img, bird.x, bird.y, bird.width, bird.height, null);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        repaint();
     }
 }
