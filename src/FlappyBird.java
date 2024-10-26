@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.*;
@@ -33,11 +34,33 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
         }
     }
 
+    int pipeX = boardWidth;
+    int pipeY = 0;
+    int pipeWidth = 64;
+    int pipeHeight = 512;
+
+    class Pipe {
+        int x = pipeX;
+        int y = pipeY;
+        int width = pipeWidth;
+        int height = pipeHeight;
+        Image img;
+        boolean passed = false;
+
+        public Pipe(Image img) {
+            this.img = img;
+        }
+    }
+
     Bird bird;
-    double velocityY = -9;
-    double gravity = 1;
+    int velocityX = -4;
+    int velocityY = -9;
+    int gravity = 1;
+
+    ArrayList<Pipe> pipes;
 
     Timer gameLoop;
+    Timer placePipesTimer;
 
     // Constructor
     public FlappyBird() {
@@ -51,9 +74,23 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
         bottomPipeImg = new ImageIcon(getClass().getResource("./bottompipe.png")).getImage();
 
         bird = new Bird(birdImg);
+        pipes = new ArrayList<Pipe>();
+
+        placePipesTimer = new Timer(1500, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                placePipes();
+            }
+        });
+        placePipesTimer.start();
 
         gameLoop = new Timer(1000/60, this); // 1000ms == 1s, divide by 60 for 60fps
         gameLoop.start();
+    }
+
+    public void placePipes() {
+        Pipe topPipe = new Pipe(topPipeImg);
+        pipes.add(topPipe);
     }
 
     public void paintComponent(Graphics g) {
@@ -64,12 +101,20 @@ public class FlappyBird extends JPanel implements ActionListener, KeyListener {
     public void draw(Graphics g) {
         g.drawImage(backgroundImg, 0, 0, boardWidth, boardHeight, null);
         g.drawImage(bird.img, bird.x, bird.y, bird.width, bird.height, null);
+
+        for (Pipe pipe : pipes) {
+            g.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height, null);
+        }
     }
 
     public void move() {
         velocityY += gravity;
         bird.y += velocityY;
         bird.y = Math.max(bird.y, 0);
+
+        for (Pipe pipe : pipes) {
+            pipe.x += velocityX;
+        }
     }
 
     // Main game loop, runs at 60 frames per second
